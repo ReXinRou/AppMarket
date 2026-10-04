@@ -50,6 +50,10 @@ import com.app.market.resources.saved_packages
 import com.app.market.resources.saved_packages_summary
 import com.app.market.resources.search_sources
 import com.app.market.resources.search_sources_summary
+import com.app.market.resources.game_sources
+import com.app.market.resources.game_sources_summary
+import com.app.market.resources.app_sources
+import com.app.market.resources.app_sources_summary
 import com.app.market.resources.settings_section_download_install
 import com.app.market.resources.show_app_comments
 import com.app.market.resources.show_app_comments_summary
@@ -105,6 +109,8 @@ fun SettingsTab(
     val installerState by installerSettingsViewModel.uiState.collectAsStateWithLifecycle()
     val homePage by updatesViewModel.homePage.collectAsStateWithLifecycle()
     val searchSources by updatesViewModel.searchSources.collectAsStateWithLifecycle()
+    val gameSources by updatesViewModel.gameSources.collectAsStateWithLifecycle()
+    val appSources by updatesViewModel.appSources.collectAsStateWithLifecycle()
     val todaySource by updatesViewModel.todaySource.collectAsStateWithLifecycle()
     val showAppComments by updatesViewModel.showAppComments.collectAsStateWithLifecycle()
     val showSameDeveloper by updatesViewModel.showSameDeveloper.collectAsStateWithLifecycle()
@@ -156,6 +162,20 @@ fun SettingsTab(
                         items = sourceOptions.map { appSourceLabel(it) },
                         selectedIndex = sourceOptions.indexOf(selectedSource),
                         onSelectedIndexChange = { updatesViewModel.setSearchSource(sourceOptions[it]) },
+                    )
+                    WindowDropdownPreference(
+                        title = stringResource(Res.string.game_sources),
+                        summary = stringResource(Res.string.game_sources_summary),
+                        items = sourceOptions.map { appSourceLabel(it) },
+                        selectedIndex = sourceOptions.indexOf(gameSources.firstOrNull()).coerceAtLeast(0),
+                        onSelectedIndexChange = { updatesViewModel.setGameSource(sourceOptions[it]) },
+                    )
+                    WindowDropdownPreference(
+                        title = stringResource(Res.string.app_sources),
+                        summary = stringResource(Res.string.app_sources_summary),
+                        items = sourceOptions.map { appSourceLabel(it) },
+                        selectedIndex = sourceOptions.indexOf(appSources.firstOrNull()).coerceAtLeast(0),
+                        onSelectedIndexChange = { updatesViewModel.setAppSource(sourceOptions[it]) },
                     )
                 }
             }

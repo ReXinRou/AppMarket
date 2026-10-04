@@ -108,6 +108,10 @@
     <string name="search_quickapp_tag">快应用</string>
     <string name="search_sources">搜索来源</string>
     <string name="search_sources_summary">用于搜索和应用详情</string>
+    <string name="game_sources">游戏来源</string>
+    <string name="game_sources_summary">用于游戏专区内容</string>
+    <string name="app_sources">应用来源</string>
+    <string name="app_sources_summary">用于应用专区内容</string>
     <string name="update_source">更新来源</string>
     <string name="update_source_summary">用于检查应用更新</string>
     <string name="today_source">今日来源</string>

@@ -69,11 +69,13 @@ class SearchViewModel(
     val downloadStates: StateFlow<Map<String, DownloadState>> = downloads.states
     private val pendingDownloads = mutableSetOf<String>()
     private var searchJob: Job? = null
+    private var sourceOverride: Set<AppSource>? = null
 
     init {
         viewModelScope.launch { reloadHistory() }
         viewModelScope.launch {
             updatePrefs.searchSources.collect { sources ->
+                if (sourceOverride != null) return@collect
                 val changed = _uiState.value.sources != sources
                 _uiState.update { it.copy(sources = sources) }
                 // 源变了旧结果就不作数，按当前关键词重搜
@@ -132,6 +134,7 @@ class SearchViewModel(
         // repopulates the just-cancelled search.
         searchJob?.cancel()
         searchJob = null
+        sourceOverride = null
         _uiState.update {
             it.copy(
                 keyword = "",
@@ -149,8 +152,11 @@ class SearchViewModel(
 
     fun selectHistory(keyword: String?) = _uiState.update { it.copy(selectedHistory = keyword) }
 
-    fun searchWith(keyword: String) {
-        _uiState.update { it.copy(keyword = keyword) }
+    fun searchWith(keyword: String, sourcesOverride: Set<AppSource>? = null) {
+        sourceOverride = sourcesOverride
+        _uiState.update { state ->
+            state.copy(keyword = keyword, sources = sourcesOverride ?: state.sources)
+        }
         runSearch()
     }
 
@@ -187,7 +193,7 @@ class SearchViewModel(
             }
         }
         searchJob = viewModelScope.launch {
-            val sources = _uiState.value.sources
+            val sources = sourceOverride ?: _uiState.value.sources
             val fetched = fetchPages(keyword, sources.associateWith { 0 })
             // 单源故障不该挡住另一源的结果
             if (fetched.values.none { it.isSuccess }) {

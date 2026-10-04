@@ -19,6 +19,8 @@ interface UpdatePreferencesRepository {
     val stripAppNameSubtitle: StateFlow<Boolean>
     val homePage: StateFlow<HomePage>
     val searchSources: StateFlow<Set<AppSource>>
+    val gameSources: StateFlow<Set<AppSource>>
+    val appSources: StateFlow<Set<AppSource>>
     val todaySource: StateFlow<AppSource>
     val updateSource: StateFlow<AppSource>
     val permanentIgnores: StateFlow<List<IgnoredUpdate>>
@@ -33,6 +35,8 @@ interface UpdatePreferencesRepository {
     suspend fun setStripAppNameSubtitle(value: Boolean)
     suspend fun setHomePage(value: HomePage)
     suspend fun setSearchSources(value: Set<AppSource>)
+    suspend fun setGameSources(value: Set<AppSource>)
+    suspend fun setAppSources(value: Set<AppSource>)
     suspend fun setTodaySource(value: AppSource)
     suspend fun setUpdateSource(value: AppSource)
     fun isIgnored(app: MarketAppInfo): Boolean

@@ -15,6 +15,8 @@ object UpdatePreferenceKeys {
     val ShowPromotions = BooleanPreferenceKey(NS, "show_promotions")
     val HomePage = StringPreferenceKey(NS, "home_page")
     val SearchSources = StringPreferenceKey(NS, "search_sources")
+    val GameSources = StringPreferenceKey(NS, "game_sources")
+    val AppSources = StringPreferenceKey(NS, "app_sources")
     val TodaySource = StringPreferenceKey(NS, "today_source")
     val UpdateSource = StringPreferenceKey(NS, "update_source")
     val PermanentIgnores = StringPreferenceKey(NS, "permanent_ignores")

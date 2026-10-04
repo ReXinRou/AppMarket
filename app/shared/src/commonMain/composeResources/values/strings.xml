@@ -107,6 +107,10 @@
     <string name="search_quickapp_tag">Quick app</string>
     <string name="search_sources">Search sources</string>
     <string name="search_sources_summary">Used for search and app details</string>
+    <string name="game_sources">Game source</string>
+    <string name="game_sources_summary">Used for the Games section</string>
+    <string name="app_sources">App source</string>
+    <string name="app_sources_summary">Used for the Apps section</string>
     <string name="update_source">Update source</string>
     <string name="update_source_summary">Used to check for app updates</string>
     <string name="today_source">Today source</string>

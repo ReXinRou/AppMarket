@@ -56,6 +56,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import com.app.market.domain.model.download.DownloadState
+import com.app.market.domain.model.market.AppSource
 import com.app.market.domain.model.market.MarketAppInfo
 import com.app.market.resources.Res
 import com.app.market.resources.cancel
@@ -107,6 +108,7 @@ fun SearchTab(
     isCurrentPage: Boolean = true,
     focusRequestId: Int = 0,
     category: AppCategory? = null,
+    categorySources: Set<AppSource>? = null,
     titleRes: StringResource = Res.string.nav_search,
     searchHintRes: StringResource = Res.string.search_hint,
 ) {
@@ -139,10 +141,10 @@ fun SearchTab(
     LaunchedEffect(state.searchEpoch) {
         if (state.searchEpoch > 0) listState.scrollToItem(0)
     }
-    LaunchedEffect(category, isCurrentPage) {
+    LaunchedEffect(category, categorySources, isCurrentPage) {
         if (!isCurrentPage) return@LaunchedEffect
         if (category == null) viewModel.clearSearch()
-        else viewModel.searchWith(category.seedKeyword)
+        else viewModel.searchWith(category.seedKeyword, categorySources)
     }
 
     val scrollBehavior = MiuixScrollBehavior()
@@ -176,7 +178,7 @@ fun SearchTab(
     // via a history chip, which does not focus the field). Using the real focus state (not the
     // sticky `searchExpanded`, which only flips true on focus gain) keeps the cancel button and the
     // Back gating from sticking after focus is lost.
-    val searchActive = isFocused || state.keyword.isNotEmpty()
+    val searchActive = category == null && (isFocused || state.keyword.isNotEmpty())
     val dismissSearchInput: () -> Unit = {
         focusManager.clearFocus()
         keyboardController?.hide()
@@ -208,7 +210,7 @@ fun SearchTab(
                     color = barColor,
                     scrollBehavior = scrollBehavior,
                     bottomContent = {
-                        Row(
+                        if (category == null) Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {

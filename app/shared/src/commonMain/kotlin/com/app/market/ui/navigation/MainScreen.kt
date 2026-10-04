@@ -56,12 +56,11 @@ import com.app.market.resources.nav_today
 import com.app.market.resources.nav_updates
 import com.app.market.resources.nav_apps
 import com.app.market.resources.nav_games
-import com.app.market.resources.search_apps_hint
-import com.app.market.resources.search_games_hint
 import com.app.market.ui.component.FloatingBottomBar
 import com.app.market.ui.component.FloatingBottomBarItem
 import com.app.market.ui.component.blur.BlurredBar
 import com.app.market.ui.component.blur.rememberBlurBackdrop
+import com.app.market.ui.screen.CategoryTab
 import com.app.market.ui.screen.SearchTab
 import com.app.market.ui.screen.SettingsTab
 import com.app.market.ui.screen.TodayTab
@@ -214,24 +213,22 @@ fun MainPage(
                     },
                 )
 
-                MainTab.Games -> SearchTab(
+                MainTab.Games -> CategoryTab(
                     viewModel = searchViewModel,
+                    category = AppCategory.GAMES,
+                    sources = updatesViewModel.gameSources,
                     bottomPadding = bottomPadding,
                     onOpenDetail = openDetail,
                     isCurrentPage = selectedPage == tabs.indexOf(MainTab.Games),
-                    category = AppCategory.GAMES,
-                    titleRes = Res.string.nav_games,
-                    searchHintRes = Res.string.search_games_hint,
                 )
 
-                MainTab.Apps -> SearchTab(
+                MainTab.Apps -> CategoryTab(
                     viewModel = searchViewModel,
+                    category = AppCategory.APPS,
+                    sources = updatesViewModel.appSources,
                     bottomPadding = bottomPadding,
                     onOpenDetail = openDetail,
                     isCurrentPage = selectedPage == tabs.indexOf(MainTab.Apps),
-                    category = AppCategory.APPS,
-                    titleRes = Res.string.nav_apps,
-                    searchHintRes = Res.string.search_apps_hint,
                 )
 
                 MainTab.Updates -> UpdatesTab(
@@ -558,7 +555,5 @@ private fun MainScreenBackHandler(
         onBackCompleted = { mainState.animateToPage(homeIndex) },
     )
 }
-
-
 
 

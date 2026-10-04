@@ -62,6 +62,8 @@ class UpdatesViewModel(
     // Separate flow (not in [uiState]) so the pager can read the seeded value synchronously.
     val homePage: StateFlow<HomePage> = prefs.homePage
     val searchSources: StateFlow<Set<AppSource>> = prefs.searchSources
+    val gameSources: StateFlow<Set<AppSource>> = prefs.gameSources
+    val appSources: StateFlow<Set<AppSource>> = prefs.appSources
     val todaySource: StateFlow<AppSource> = prefs.todaySource
     val updateSource: StateFlow<AppSource> = prefs.updateSource
 
@@ -140,6 +142,8 @@ class UpdatesViewModel(
     fun setStripAppNameSubtitle(value: Boolean) = persist { prefs.setStripAppNameSubtitle(value) }
     fun setHomePage(value: HomePage) = persist { prefs.setHomePage(value) }
     fun setSearchSource(value: AppSource) = persist { prefs.setSearchSources(setOf(value)) }
+    fun setGameSource(value: AppSource) = persist { prefs.setGameSources(setOf(value)) }
+    fun setAppSource(value: AppSource) = persist { prefs.setAppSources(setOf(value)) }
     fun setTodaySource(value: AppSource) = persist { prefs.setTodaySource(value) }
     fun setUpdateSource(value: AppSource) = persist { prefs.setUpdateSource(value) }
 

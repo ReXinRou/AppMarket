@@ -61,6 +61,10 @@ internal class UpdatePreferencesRepositoryImpl(
     override val homePage: StateFlow<HomePage> = _homePage.asStateFlow()
     private val _searchSources = MutableStateFlow(AppSource.Default)
     override val searchSources: StateFlow<Set<AppSource>> = _searchSources.asStateFlow()
+    private val _gameSources = MutableStateFlow(AppSource.Default)
+    override val gameSources: StateFlow<Set<AppSource>> = _gameSources.asStateFlow()
+    private val _appSources = MutableStateFlow(AppSource.Default)
+    override val appSources: StateFlow<Set<AppSource>> = _appSources.asStateFlow()
     private val _todaySource = MutableStateFlow(AppSource.DefaultTodaySource)
     override val todaySource: StateFlow<AppSource> = _todaySource.asStateFlow()
     private val _updateSource = MutableStateFlow(AppSource.DefaultUpdateSource)
@@ -89,6 +93,12 @@ internal class UpdatePreferencesRepositoryImpl(
             observe("homePage", preferences.observe(UpdatePreferenceKeys.HomePage)) { _homePage.value = HomePage.fromToken(it) },
             observe("searchSources", preferences.observe(UpdatePreferenceKeys.SearchSources)) {
                 _searchSources.value = AppSource.parse(it)
+            },
+            observe("gameSources", preferences.observe(UpdatePreferenceKeys.GameSources)) {
+                _gameSources.value = AppSource.parse(it)
+            },
+            observe("appSources", preferences.observe(UpdatePreferenceKeys.AppSources)) {
+                _appSources.value = AppSource.parse(it)
             },
             observe("todaySource", preferences.observe(UpdatePreferenceKeys.TodaySource)) {
                 _todaySource.value = AppSource.fromToken(it).todayOrDefault()
@@ -155,6 +165,12 @@ internal class UpdatePreferencesRepositoryImpl(
 
     override suspend fun setSearchSources(value: Set<AppSource>) =
         preferences.put(UpdatePreferenceKeys.SearchSources, AppSource.serialize(value.ifEmpty { AppSource.Default }))
+
+    override suspend fun setGameSources(value: Set<AppSource>) =
+        preferences.put(UpdatePreferenceKeys.GameSources, AppSource.serialize(value.ifEmpty { AppSource.Default }))
+
+    override suspend fun setAppSources(value: Set<AppSource>) =
+        preferences.put(UpdatePreferenceKeys.AppSources, AppSource.serialize(value.ifEmpty { AppSource.Default }))
 
     override suspend fun setTodaySource(value: AppSource) =
         preferences.put(UpdatePreferenceKeys.TodaySource, value.todayOrDefault().token)
