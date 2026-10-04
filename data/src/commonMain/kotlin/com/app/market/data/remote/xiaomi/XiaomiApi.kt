@@ -13,6 +13,7 @@ import com.app.market.domain.model.installed.InstalledPackage
 import com.app.market.domain.model.market.AppComment
 import com.app.market.domain.model.market.AppComments
 import com.app.market.domain.model.market.AppDetail
+import com.app.market.domain.model.market.AppKind
 import com.app.market.domain.model.market.AppPromotion
 import com.app.market.domain.model.market.AppScreenshot
 import com.app.market.domain.model.market.AppSource
@@ -20,6 +21,7 @@ import com.app.market.domain.model.market.AppVideo
 import com.app.market.domain.model.market.MarketAppInfo
 import com.app.market.domain.model.market.ScreenshotOrientation
 import com.app.market.domain.model.market.SearchPage
+import com.app.market.domain.model.market.classifyKindFromCategory
 import com.app.market.domain.model.market.hasInstalledSplits
 import com.app.market.domain.model.profile.MarketProfile
 import com.app.market.domain.model.today.TodayArticle
@@ -1037,8 +1039,27 @@ internal class XiaomiApi(
             type = type,
             isAd = o.bool("isSearchTopAd"),
             subscribeState = o.int("subscribeState"),
+            category = listOf(o.str("level1CategoryName"), o.str("level2CategoryName"))
+                .filter(String::isNotBlank)
+                .joinToString(" / "),
             downloadBlockReason = xiaomiDownloadBlockReason(o)
                 .ifBlank { downloadable?.let(::xiaomiDownloadBlockReason).orEmpty() },
+            kind = xiaomiAppKind(o),
+        )
+    }
+
+    /**
+     * 小米搜索/详情条目优先用结构化 `appCategoryType`(1=游戏,0=应用);缺失时(默认 -1)退回
+     * 分类名判定(英文一级分类游戏固定为 `Games`)。避免把分类名含「游戏」的非游戏条目(如
+     * 游戏中心、游戏陪玩)误判为游戏。
+     */
+    private fun xiaomiAppKind(o: JsonObject): AppKind = when (o.int("appCategoryType", -1)) {
+        1 -> AppKind.GAME
+        0 -> AppKind.APP
+        else -> classifyKindFromCategory(
+            listOf(o.str("level1CategoryName"), o.str("level2CategoryName"))
+                .filter(String::isNotBlank)
+                .joinToString(" "),
         )
     }
 

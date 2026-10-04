@@ -10,6 +10,7 @@ import com.app.market.data.remote.xiaomi.objAt
 import com.app.market.data.remote.xiaomi.str
 import com.app.market.domain.model.installed.InstalledPackage
 import com.app.market.domain.model.market.AppDetail
+import com.app.market.domain.model.market.AppKind
 import com.app.market.domain.model.market.AppScreenshot
 import com.app.market.domain.model.market.AppSource
 import com.app.market.domain.model.market.MarketAppInfo
@@ -55,7 +56,15 @@ internal data class HonorAppRecord(
         category = value.obj("thirdLevelCategory")?.str("classifyName")
             .orEmpty().ifBlank { value.str("secondCategoryName") },
         downloadCount = value.long("downTm", value.long("downNum")),
+        // appType: 1=游戏、0=应用（官方顶层资源类型），是最可靠的归类信号。
+        kind = honorAppKind(value.int("appType", -1)),
     )
+
+    private fun honorAppKind(appType: Int): AppKind = when (appType) {
+        1 -> AppKind.GAME
+        0 -> AppKind.APP
+        else -> AppKind.UNKNOWN
+    }
 
     fun toDetail(installed: InstalledPackage? = null): AppDetail {
         val app = toApp(installed)

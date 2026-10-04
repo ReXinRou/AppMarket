@@ -16,7 +16,9 @@ import com.app.market.domain.repository.SearchHistoryRepository
 import com.app.market.domain.repository.UpdatePreferencesRepository
 import com.app.market.platform.UiPlatform
 import com.app.market.ui.model.AppActionKind
+import com.app.market.ui.model.AppCategory
 import com.app.market.ui.model.SearchResultItem
+import com.app.market.ui.model.matches
 import com.app.market.ui.model.resolveActionKind
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
@@ -47,6 +49,8 @@ data class SearchUiState(
     /** Bumps on every completed search; used to invalidate an in-flight page load and reset scroll. */
     val searchEpoch: Int = 0,
     val sources: Set<AppSource> = AppSource.Default,
+    /** Non-null inside a catalogue section (游戏/应用); results and pagination are filtered to it. */
+    val category: AppCategory? = null,
 ) {
     val hasMore: Boolean get() = paging.values.any { it.hasMore }
 }
@@ -152,10 +156,18 @@ class SearchViewModel(
 
     fun selectHistory(keyword: String?) = _uiState.update { it.copy(selectedHistory = keyword) }
 
-    fun searchWith(keyword: String, sourcesOverride: Set<AppSource>? = null) {
+    fun searchWith(
+        keyword: String,
+        sourcesOverride: Set<AppSource>? = null,
+        category: AppCategory? = null,
+    ) {
         sourceOverride = sourcesOverride
         _uiState.update { state ->
-            state.copy(keyword = keyword, sources = sourcesOverride ?: state.sources)
+            state.copy(
+                keyword = keyword,
+                sources = sourcesOverride ?: state.sources,
+                category = category,
+            )
         }
         runSearch()
     }
@@ -194,6 +206,7 @@ class SearchViewModel(
         }
         searchJob = viewModelScope.launch {
             val sources = sourceOverride ?: _uiState.value.sources
+            val category = _uiState.value.category
             val fetched = fetchPages(keyword, sources.associateWith { 0 })
             // 单源故障不该挡住另一源的结果
             if (fetched.values.none { it.isSuccess }) {
@@ -202,6 +215,7 @@ class SearchViewModel(
                 return@launch
             }
             val items = toItems(mergeApps(emptyList(), orderedApps(fetched)), emptyList())
+                .forCategory(category)
             _uiState.update {
                 it.copy(
                     loading = false,
@@ -215,6 +229,10 @@ class SearchViewModel(
         }
     }
 
+    /** 专区只保留本区条目;全局搜索(category 为空)保留全部。 */
+    private fun List<SearchResultItem>.forCategory(category: AppCategory?): List<SearchResultItem> =
+        if (category == null) this else filter { it.app.matches(category) }
+
     /**
      * Appends the next page(s), skipping all-duplicate pages so each trigger makes progress. Aborts if a
      * newer search supersedes this one (tracked by [SearchUiState.activeKeyword] + [SearchUiState.searchEpoch]).
@@ -224,6 +242,7 @@ class SearchViewModel(
         if (snapshot.loading || snapshot.loadingMore || !snapshot.hasMore || snapshot.activeKeyword.isBlank()) return
         val baseKeyword = snapshot.activeKeyword
         val baseEpoch = snapshot.searchEpoch
+        val category = snapshot.category
         _uiState.update { it.copy(loadingMore = true) }
         viewModelScope.launch {
             fun superseded() = _uiState.value.let { it.activeKeyword != baseKeyword || it.searchEpoch != baseEpoch }
@@ -245,8 +264,10 @@ class SearchViewModel(
                 val before = _uiState.value
                 if (before.activeKeyword != baseKeyword || before.searchEpoch != baseEpoch) break
                 val mergedApps = mergeApps(before.results.map { it.app }, incoming)
-                addedAny = mergedApps.size > before.results.size
-                val resolved = toItems(mergedApps, before.results)
+                val resolved = toItems(mergedApps, before.results).forCategory(category)
+                // 以「本区可见条目」为准判断是否推进:整页都是异区条目时也要继续取下一页,
+                // 否则列表底部会停在当前页,表现为「继续加载失效」。
+                addedAny = resolved.size > before.results.size
                 val committedPaging = paging
                 _uiState.update { state ->
                     if (state.activeKeyword != baseKeyword || state.searchEpoch != baseEpoch) state

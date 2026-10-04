@@ -2,6 +2,7 @@ package com.app.market.data.remote.oppo
 
 import com.app.market.domain.model.market.AppSource
 import com.app.market.domain.model.market.MarketAppInfo
+import com.app.market.domain.model.market.classifyKindFromCategory
 import com.app.market.domain.model.today.TodayArticle
 import com.app.market.domain.model.today.TodayArticleBlock
 import com.app.market.domain.model.today.TodayFeaturedItem
@@ -409,6 +410,7 @@ private fun OppoResource.toTodayApp(): MarketAppInfo = MarketAppInfo(
     source = AppSource.OPPO,
     category = category,
     downloadCount = resolvedDownloadCount(),
+    kind = classifyKindFromCategory(category),
 )
 
 /** Keeps OPPO's server order within each relevance bucket, but never buries an exact app match. */

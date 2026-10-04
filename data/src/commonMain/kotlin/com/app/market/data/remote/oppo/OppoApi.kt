@@ -13,6 +13,7 @@ import com.app.market.domain.model.market.AppDetail
 import com.app.market.domain.model.market.AppScreenshot
 import com.app.market.domain.model.market.AppSource
 import com.app.market.domain.model.market.MarketAppInfo
+import com.app.market.domain.model.market.classifyKindFromCategory
 import com.app.market.domain.model.market.ScreenshotOrientation
 import com.app.market.domain.model.market.SearchPage
 import com.app.market.domain.model.profile.MarketProfile
@@ -450,6 +451,7 @@ internal class OppoApi(
         source = AppSource.OPPO,
         category = resource.category,
         downloadCount = resource.resolvedDownloadCount(),
+        kind = classifyKindFromCategory(resource.category),
     )
 
     private fun OppoResource.toScreenshots(): List<AppScreenshot> {

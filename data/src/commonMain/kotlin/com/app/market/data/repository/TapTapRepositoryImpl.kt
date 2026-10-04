@@ -10,6 +10,7 @@ import com.app.market.domain.model.download.DownloadMeta
 import com.app.market.domain.model.download.DownloadPart
 import com.app.market.domain.model.installed.InstalledPackage
 import com.app.market.domain.model.market.AppDetail
+import com.app.market.domain.model.market.AppKind
 import com.app.market.domain.model.market.AppScreenshot
 import com.app.market.domain.model.market.AppSource
 import com.app.market.domain.model.market.MarketAppInfo
@@ -243,6 +244,8 @@ internal class TapTapRepositoryImpl(
         source = AppSource.TAPTAP,
         category = category,
         downloadCount = downloadCount,
+        // TapTap 是游戏专营商店，条目天然属于游戏专区。
+        kind = AppKind.GAME,
     )
 
     private fun TapTapSearchHit.toFallbackApp(): MarketAppInfo = MarketAppInfo(
@@ -258,6 +261,7 @@ internal class TapTapRepositoryImpl(
         openLink = "https://www.taptap.cn/app/$appId",
         source = AppSource.TAPTAP,
         category = category,
+        kind = AppKind.GAME,
     )
 
     private fun TapTapRecommendationRecord.toFallbackApp(): MarketAppInfo = MarketAppInfo(
@@ -274,6 +278,7 @@ internal class TapTapRepositoryImpl(
         openLink = "https://www.taptap.cn/app/$appId",
         source = AppSource.TAPTAP,
         category = category,
+        kind = AppKind.GAME,
     )
 
     private fun MarketAppInfo.withInstalled(installed: InstalledPackage): MarketAppInfo = copy(

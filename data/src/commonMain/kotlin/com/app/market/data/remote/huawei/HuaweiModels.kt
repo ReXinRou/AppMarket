@@ -1,5 +1,6 @@
 package com.app.market.data.remote.huawei
 
+import com.app.market.domain.model.market.AppKind
 import kotlinx.serialization.json.JsonObject
 
 internal data class HuaweiTab(
@@ -30,6 +31,7 @@ internal data class HuaweiAppRecord(
     val brief: String = "",
     val description: String = "",
     val category: String = "",
+    val kind: AppKind = AppKind.UNKNOWN,
     val minAge: Int = 0,
     val screenshots: List<String> = emptyList(),
     val downloadUrl: String = "",

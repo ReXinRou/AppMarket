@@ -13,6 +13,7 @@ import com.app.market.domain.model.market.AppDetail
 import com.app.market.domain.model.market.AppScreenshot
 import com.app.market.domain.model.market.AppSource
 import com.app.market.domain.model.market.MarketAppInfo
+import com.app.market.domain.model.market.classifyKindFromCategory
 import com.app.market.domain.model.market.ScreenshotOrientation
 import com.app.market.domain.model.market.SearchPage
 import com.app.market.domain.model.update.ManualUpdateRequest
@@ -141,6 +142,7 @@ internal class SamsungRepositoryImpl(
         val guid = samsungValue("GUID", "packageName").ifBlank { ref.guid }
         val productId = samsungValue("productID").ifBlank { ref.productId }
         val rawRating = samsungValue("averageRating").toDoubleOrNull() ?: 0.0
+        val category = samsungValue("categoryName", "categoryPath")
         return MarketAppInfo(
             appId = productId.toLongOrNull() ?: stableId(guid.ifBlank { productId }),
             packageName = guid,
@@ -154,7 +156,8 @@ internal class SamsungRepositoryImpl(
             changeLog = samsungValue("updateDescription"),
             openLink = ref.copy(productId = productId, guid = guid).toLink(),
             source = AppSource.SAMSUNG,
-            category = samsungValue("categoryName", "categoryPath"),
+            category = category,
+            kind = classifyKindFromCategory(category),
         )
     }
 

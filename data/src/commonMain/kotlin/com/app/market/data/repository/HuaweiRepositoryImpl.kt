@@ -205,6 +205,7 @@ internal class HuaweiRepositoryImpl(
         source = AppSource.HUAWEI,
         category = record.category,
         downloadCount = record.downloadCount,
+        kind = record.kind,
     )
 
     private fun HuaweiAppRecord.toDownloadMeta(app: MarketAppInfo): DownloadMeta {

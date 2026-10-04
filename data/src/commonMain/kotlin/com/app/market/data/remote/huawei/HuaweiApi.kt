@@ -8,6 +8,7 @@ import com.app.market.data.remote.xiaomi.str
 import com.app.market.domain.exception.MarketException
 import com.app.market.domain.model.installed.InstalledPackage
 import com.app.market.domain.model.market.AppSource
+import com.app.market.domain.model.market.classifyKindFromCategory
 import com.app.market.domain.repository.ProfileRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.JsonArray
@@ -342,6 +343,7 @@ private fun parseHuaweiLayoutRecord(value: JsonObject): HuaweiAppRecord? {
         rating = value.double("stars").coerceIn(0.0, 5.0),
         brief = value.str("memo").ifBlank { value.str("subTitle") }.ifBlank { value.str("intro") },
         category = value.str("kindName"),
+        kind = classifyKindFromCategory(value.str("kindName")),
         minAge = value.int("minAge"),
         downloadUrl = value.str("downurl").ifBlank { value.str("url") },
         sha256 = value.str("sha256").lowercase(),
