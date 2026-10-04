@@ -54,6 +54,10 @@ import com.app.market.resources.nav_search
 import com.app.market.resources.nav_settings
 import com.app.market.resources.nav_today
 import com.app.market.resources.nav_updates
+import com.app.market.resources.nav_apps
+import com.app.market.resources.nav_games
+import com.app.market.resources.search_apps_hint
+import com.app.market.resources.search_games_hint
 import com.app.market.ui.component.FloatingBottomBar
 import com.app.market.ui.component.FloatingBottomBarItem
 import com.app.market.ui.component.blur.BlurredBar
@@ -62,6 +66,7 @@ import com.app.market.ui.screen.SearchTab
 import com.app.market.ui.screen.SettingsTab
 import com.app.market.ui.screen.TodayTab
 import com.app.market.ui.screen.UpdatesTab
+import com.app.market.ui.model.AppCategory
 import com.app.market.ui.theme.LocalEnableFloatingBottomBar
 import com.app.market.ui.theme.LocalEnableFloatingBottomBarBlur
 import com.app.market.ui.theme.LocalEnableNavigationBadge
@@ -91,6 +96,7 @@ import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Create
+import top.yukonga.miuix.kmp.icon.extended.Play
 import top.yukonga.miuix.kmp.icon.extended.Search
 import top.yukonga.miuix.kmp.icon.extended.Settings
 import top.yukonga.miuix.kmp.icon.extended.Update
@@ -98,7 +104,7 @@ import top.yukonga.miuix.kmp.theme.MiuixTheme
 import kotlin.math.abs
 
 // 主页签集合按平台能力裁剪：桌面端（无法扫描已装应用 / 安装）不含「更新」。
-private enum class MainTab { Today, Updates, Search, Settings }
+private enum class MainTab { Today, Games, Apps, Updates, Search, Settings }
 
 @Composable
 fun MainPage(
@@ -120,6 +126,8 @@ fun MainPage(
     val tabs = remember(appManagementSupported) {
         buildList {
             add(MainTab.Today)
+            add(MainTab.Games)
+            add(MainTab.Apps)
             if (appManagementSupported) add(MainTab.Updates)
             add(MainTab.Search)
             add(MainTab.Settings)
@@ -204,6 +212,26 @@ fun MainPage(
                     onClickArticle = { article ->
                         navigator.push(Route.TodayArticle(article.rId))
                     },
+                )
+
+                MainTab.Games -> SearchTab(
+                    viewModel = searchViewModel,
+                    bottomPadding = bottomPadding,
+                    onOpenDetail = openDetail,
+                    isCurrentPage = selectedPage == tabs.indexOf(MainTab.Games),
+                    category = AppCategory.GAMES,
+                    titleRes = Res.string.nav_games,
+                    searchHintRes = Res.string.search_games_hint,
+                )
+
+                MainTab.Apps -> SearchTab(
+                    viewModel = searchViewModel,
+                    bottomPadding = bottomPadding,
+                    onOpenDetail = openDetail,
+                    isCurrentPage = selectedPage == tabs.indexOf(MainTab.Apps),
+                    category = AppCategory.APPS,
+                    titleRes = Res.string.nav_apps,
+                    searchHintRes = Res.string.search_apps_hint,
                 )
 
                 MainTab.Updates -> UpdatesTab(
@@ -326,7 +354,7 @@ fun MainPage(
                             tabs.forEachIndexed { index, tab ->
                                 val label = stringResource(tab.labelRes)
                                 FloatingBottomBarItem(
-                                    modifier = Modifier.defaultMinSize(minWidth = 76.dp),
+                                    modifier = Modifier.defaultMinSize(minWidth = if (tabs.size > 4) 56.dp else 76.dp),
                                     selected = mainPagerState.selectedPage == index,
                                     onClick = { onTabClick(index, tab) },
                                 ) {
@@ -390,6 +418,8 @@ private fun HomePage.toTab(): MainTab = when (this) {
 private val MainTab.icon
     get() = when (this) {
         MainTab.Today -> MiuixIcons.Create
+        MainTab.Games -> MiuixIcons.Play
+        MainTab.Apps -> MiuixIcons.Create
         MainTab.Updates -> MiuixIcons.Update
         MainTab.Search -> MiuixIcons.Search
         MainTab.Settings -> MiuixIcons.Settings
@@ -398,6 +428,8 @@ private val MainTab.icon
 private val MainTab.labelRes
     get() = when (this) {
         MainTab.Today -> Res.string.nav_today
+        MainTab.Games -> Res.string.nav_games
+        MainTab.Apps -> Res.string.nav_apps
         MainTab.Updates -> Res.string.nav_updates
         MainTab.Search -> Res.string.nav_search
         MainTab.Settings -> Res.string.nav_settings
@@ -526,7 +558,6 @@ private fun MainScreenBackHandler(
         onBackCompleted = { mainState.animateToPage(homeIndex) },
     )
 }
-
 
 
 

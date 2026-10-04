@@ -73,13 +73,16 @@ import com.app.market.ui.component.LoadingBox
 import com.app.market.ui.component.PageVerticalPadding
 import com.app.market.ui.component.blur.BlurredBar
 import com.app.market.ui.component.blur.rememberBlurBackdrop
+import com.app.market.ui.model.AppCategory
 import com.app.market.ui.model.AppActionKind
 import com.app.market.ui.util.installActionText
 import com.app.market.ui.util.rememberIsWideScreen
+import com.app.market.ui.model.matches
 import com.app.market.viewmodel.SearchUiState
 import com.app.market.viewmodel.SearchViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.StringResource
 import top.yukonga.miuix.kmp.basic.Icon
 import top.yukonga.miuix.kmp.basic.InputField
 import top.yukonga.miuix.kmp.basic.MiuixScrollBehavior
@@ -103,8 +106,21 @@ fun SearchTab(
     onOpenDetail: (MarketAppInfo) -> Unit,
     isCurrentPage: Boolean = true,
     focusRequestId: Int = 0,
+    category: AppCategory? = null,
+    titleRes: StringResource = Res.string.nav_search,
+    searchHintRes: StringResource = Res.string.search_hint,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val visibleResults = remember(state.results, category) {
+        category?.let { selected -> state.results.filter { it.app.matches(selected) } } ?: state.results
+    }
+    val displayState = remember(state, visibleResults) {
+        state.copy(
+            results = visibleResults,
+            showNoResults = state.showNoResults ||
+                    (category != null && !state.loading && state.activeKeyword.isNotBlank() && visibleResults.isEmpty()),
+        )
+    }
     val downloadStates = viewModel.downloadStates.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
@@ -122,6 +138,11 @@ fun SearchTab(
     // Reset scroll to top on every completed search (epoch changes even for a same-keyword re-search).
     LaunchedEffect(state.searchEpoch) {
         if (state.searchEpoch > 0) listState.scrollToItem(0)
+    }
+    LaunchedEffect(category, isCurrentPage) {
+        if (!isCurrentPage) return@LaunchedEffect
+        if (category == null) viewModel.clearSearch()
+        else viewModel.searchWith(category.seedKeyword)
     }
 
     val scrollBehavior = MiuixScrollBehavior()
@@ -183,7 +204,7 @@ fun SearchTab(
         topBar = {
             BlurredBar(backdrop = backdrop, blurActive = blurActive) {
                 AdaptiveTopAppBar(
-                    title = stringResource(Res.string.nav_search),
+                    title = stringResource(titleRes),
                     color = barColor,
                     scrollBehavior = scrollBehavior,
                     bottomContent = {
@@ -200,7 +221,7 @@ fun SearchTab(
                                 },
                                 expanded = searchExpanded,
                                 onExpandedChange = { searchExpanded = it },
-                                label = stringResource(Res.string.search_hint),
+                                label = stringResource(searchHintRes),
                                 interactionSource = interactionSource,
                                 modifier = Modifier
                                     .focusRequester(focusRequester)
@@ -238,7 +259,7 @@ fun SearchTab(
         )
         Box(Modifier.fillMaxHeight()) {
             Crossfade(
-                targetState = state.loading && state.results.isEmpty(),
+                targetState = displayState.loading && displayState.results.isEmpty(),
                 modifier = Modifier
                     .fillMaxSize()
                     .then(backdropModifier),
@@ -248,7 +269,7 @@ fun SearchTab(
                     LoadingBox(Modifier.fillMaxSize().padding(contentPadding))
                 } else {
                     SearchResultsList(
-                        state = state,
+                        state = displayState,
                         listState = listState,
                         downloadStates = downloadStates,
                         contentPadding = contentPadding,
