@@ -3,6 +3,7 @@
 .gradle/
 build/
 out/
+dist/
 local.properties
 *.log
 output.json
@@ -24,6 +25,18 @@ kotlin-js-store/
 release/
 debug/
 *.apk
+*.aab
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.deb
+*.dmg
+*.msi
+*.tmp
+*.bak
+*.old
+*.swp
 
 # signing
 *.jks
