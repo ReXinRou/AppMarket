@@ -13,6 +13,7 @@ import com.app.market.domain.model.installed.InstalledPackage
 import com.app.market.domain.model.market.AppDetail
 import com.app.market.domain.model.market.AppScreenshot
 import com.app.market.domain.model.market.AppSource
+import com.app.market.domain.model.market.classifyKindFromCategory
 import com.app.market.domain.model.market.HistoricalVersion
 import com.app.market.domain.model.market.HistoricalVersionPage
 import com.app.market.domain.model.market.MarketAppInfo
@@ -372,6 +373,8 @@ internal fun parseWandoujiaApp(json: JsonObject, detailSizeInKib: Boolean): Mark
         ratingScore = (json.wdjDouble("score") / 2.0).coerceIn(0.0, 5.0),
         changeLog = wandoujiaPlainText(json.wdjString("verDesc")),
         source = AppSource.WANDOUJIA,
+        category = json.wdjString("categoryName"),
+        kind = classifyKindFromCategory(json.wdjString("categoryName")),
     )
 }
 

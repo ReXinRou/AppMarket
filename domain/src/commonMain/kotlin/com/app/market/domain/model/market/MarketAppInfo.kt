@@ -28,6 +28,8 @@ data class MarketAppInfo(
     val source: AppSource = AppSource.XIAOMI,
     val category: String = "",
     val downloadCount: Long = 0L,
+    /** 来源声明的顶层归类;UNKNOWN 表示来源未提供明确信号,由展示层按专区决定。 */
+    val kind: AppKind = AppKind.UNKNOWN,
 )
 
 fun MarketAppInfo.hasInstalledSplits(): Boolean =

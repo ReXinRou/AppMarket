@@ -1,28 +1,20 @@
 package com.app.market.ui.model
 
+import com.app.market.domain.model.market.AppKind
 import com.app.market.domain.model.market.MarketAppInfo
 
 /** Top-level catalogue sections exposed in the main navigation. */
 enum class AppCategory(
     val seedKeyword: String,
+    val kind: AppKind,
 ) {
-    GAMES("游戏"),
-    APPS("应用"),
+    GAMES("游戏", AppKind.GAME),
+    APPS("应用", AppKind.APP),
 }
 
 /**
- * Store APIs do not agree on a single category taxonomy. Keep the matching deliberately broad:
- * explicit game labels win, while apps are the complementary catalogue section.
+ * A section shows only items whose source-declared [AppKind] matches it. Items the source could not
+ * classify (UNKNOWN) belong to neither section — guessing from the display name is what put games in
+ * the apps list before, so it is deliberately not used here.
  */
-fun MarketAppInfo.matches(category: AppCategory): Boolean {
-    val searchable = listOf(displayName, category, type).joinToString(" ").lowercase()
-    val gameMarkers = listOf(
-        "游戏", "网游", "手游", "休闲", "益智", "动作", "角色扮演", "策略", "射击", "棋牌",
-        "模拟", "竞速", "冒险", "养成", "game", "games", "gaming", "taptap",
-    )
-    val isGame = gameMarkers.any(searchable::contains)
-    return when (category) {
-        AppCategory.GAMES -> isGame
-        AppCategory.APPS -> !isGame
-    }
-}
+fun MarketAppInfo.matches(category: AppCategory): Boolean = kind == category.kind

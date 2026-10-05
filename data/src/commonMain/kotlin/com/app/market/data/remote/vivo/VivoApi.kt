@@ -7,6 +7,7 @@ import com.app.market.domain.exception.MarketException
 import com.app.market.domain.model.download.DownloadMeta
 import com.app.market.domain.model.download.DownloadPart
 import com.app.market.domain.model.market.AppDetail
+import com.app.market.domain.model.market.AppKind
 import com.app.market.domain.model.market.AppScreenshot
 import com.app.market.domain.model.market.AppSource
 import com.app.market.domain.model.market.MarketAppInfo
@@ -336,7 +337,22 @@ internal fun parseVivoApp(o: JsonObject): MarketAppInfo? {
             ""
         },
         source = AppSource.VIVO,
+        category = o.str("category"),
+        kind = vivoAppKind(o),
     )
+}
+
+/**
+ * vivo 搜索条目用 `category` 区分顶层归类:0=应用、1/2=游戏(实测 1=休闲小游戏、2=网游)。
+ * `atype` 同时给出同一信号(1=应用、2=游戏),两者互为佐证。字段缺失时用 -1 兜底,避免把
+ * 「无信号」当成 category=0 的应用。
+ */
+internal fun vivoAppKind(o: JsonObject): AppKind = when {
+    o.int("category", -1) >= 1 -> AppKind.GAME
+    o.int("atype", -1) == 2 -> AppKind.GAME
+    o.int("category", -1) == 0 -> AppKind.APP
+    o.int("atype", -1) == 1 -> AppKind.APP
+    else -> AppKind.UNKNOWN
 }
 
 internal fun parseVivoScreenshots(json: JsonObject): List<AppScreenshot> {

@@ -78,7 +78,6 @@ import com.app.market.ui.model.AppCategory
 import com.app.market.ui.model.AppActionKind
 import com.app.market.ui.util.installActionText
 import com.app.market.ui.util.rememberIsWideScreen
-import com.app.market.ui.model.matches
 import com.app.market.viewmodel.SearchUiState
 import com.app.market.viewmodel.SearchViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -113,16 +112,9 @@ fun SearchTab(
     searchHintRes: StringResource = Res.string.search_hint,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val visibleResults = remember(state.results, category) {
-        category?.let { selected -> state.results.filter { it.app.matches(selected) } } ?: state.results
-    }
-    val displayState = remember(state, visibleResults) {
-        state.copy(
-            results = visibleResults,
-            showNoResults = state.showNoResults ||
-                    (category != null && !state.loading && state.activeKeyword.isNotBlank() && visibleResults.isEmpty()),
-        )
-    }
+    // Section results are already filtered to the section's kind by the view model; pagination is
+    // section-aware, so the list can scroll past non-matching pages instead of stalling at the bottom.
+    val displayState = state
     val downloadStates = viewModel.downloadStates.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
@@ -144,7 +136,7 @@ fun SearchTab(
     LaunchedEffect(category, categorySources, isCurrentPage) {
         if (!isCurrentPage) return@LaunchedEffect
         if (category == null) viewModel.clearSearch()
-        else viewModel.searchWith(category.seedKeyword, categorySources)
+        else viewModel.searchWith(category.seedKeyword, categorySources, category)
     }
 
     val scrollBehavior = MiuixScrollBehavior()
